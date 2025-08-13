@@ -52,21 +52,28 @@ class OverlayView: NSView {
         let cursorX = mouseLocation.x - screenFrame.origin.x
         let cursorY = mouseLocation.y - screenFrame.origin.y
         let cursorCenter = CGPoint(x: cursorX, y: cursorY)
-
-        context.setBlendMode(.clear)
-        context.addEllipse(in: CGRect(
+        
+        let circleRect = CGRect(
             x: cursorCenter.x - cursorRadius,
             y: cursorCenter.y - cursorRadius,
             width: cursorRadius * 2,
             height: cursorRadius * 2
-        ))
+        )
+
+        context.setBlendMode(.clear)
+        context.addEllipse(in: circleRect)
         context.fillPath()
+        
         context.setBlendMode(.normal)
+        context.setStrokeColor(NSColor.white.cgColor)
+        context.setLineWidth(2.0)
+        context.strokeEllipse(in: circleRect)
     }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: OverlayWindow!
+    var mouseMoveMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let args = CommandLine.arguments
@@ -80,7 +87,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 setupOverlay()
                 handleOnCommand(args: args)
             default:
-                // Fallback for any other argument, could be the duration for backward compatibility
                 setupOverlay()
                 handleLegacyOrDurationCommand(args: args)
             }
@@ -88,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // No arguments, run for 1 second
             setupOverlay()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                NSApp.terminate(nil)
+                self.cleanupAndTerminate()
             }
         }
     }
@@ -115,6 +121,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameOrigin(frame.origin)
         window.makeKeyAndOrderFront(nil)
         self.window = window
+        
+        startMouseMoveMonitor()
+    }
+    
+    func startMouseMoveMonitor() {
+        mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+            self?.window.contentView?.needsDisplay = true
+        }
+    }
+
+    func removeMouseMoveMonitor() {
+        if let monitor = mouseMoveMonitor {
+            NSEvent.removeMonitor(monitor)
+            mouseMoveMonitor = nil
+        }
     }
 
     func handleOnCommand(args: [String]) {
@@ -124,18 +145,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self.cleanupAndTerminate()
             }
         }
-        // If no duration, it runs indefinitely
     }
 
     func handleLegacyOrDurationCommand(args: [String]) {
         if let duration = Double(args[1]), duration > 0 {
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                NSApp.terminate(nil)
+                self.cleanupAndTerminate()
             }
         } else {
-            // Default to 1 second if argument is not a valid duration
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                NSApp.terminate(nil)
+                self.cleanupAndTerminate()
             }
         }
     }
@@ -150,6 +169,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func terminateRunningInstance() {
+        removeMouseMoveMonitor()
         do {
             let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
             if let pid = Int32(pidString.trimmingCharacters(in: .whitespacesAndNewlines)) {
@@ -162,6 +182,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func cleanupAndTerminate() {
+        removeMouseMoveMonitor()
         do {
             try FileManager.default.removeItem(atPath: pidFilePath)
         } catch {
@@ -169,9 +190,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         NSApp.terminate(nil)
     }
-
+    
     func applicationWillTerminate(_ aNotification: Notification) {
-        // This is a fallback cleanup
+        removeMouseMoveMonitor()
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: pidFilePath) {
             do {
