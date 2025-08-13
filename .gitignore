@@ -11,4 +11,3 @@ yarn-error.log*
 
 # Env files
 .env
-*.DS_Store

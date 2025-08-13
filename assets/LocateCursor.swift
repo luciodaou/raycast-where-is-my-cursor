@@ -52,7 +52,7 @@ class OverlayView: NSView {
         let cursorX = mouseLocation.x - screenFrame.origin.x
         let cursorY = mouseLocation.y - screenFrame.origin.y
         let cursorCenter = CGPoint(x: cursorX, y: cursorY)
-        
+
         let circleRect = CGRect(
             x: cursorCenter.x - cursorRadius,
             y: cursorCenter.y - cursorRadius,
@@ -63,7 +63,7 @@ class OverlayView: NSView {
         context.setBlendMode(.clear)
         context.addEllipse(in: circleRect)
         context.fillPath()
-        
+
         context.setBlendMode(.normal)
         context.setStrokeColor(NSColor.white.cgColor)
         context.setLineWidth(2.0)
@@ -121,10 +121,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameOrigin(frame.origin)
         window.makeKeyAndOrderFront(nil)
         self.window = window
-        
+
         startMouseMoveMonitor()
     }
-    
+
     func startMouseMoveMonitor() {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
             self?.window.contentView?.needsDisplay = true
@@ -190,7 +190,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         NSApp.terminate(nil)
     }
-    
+
     func applicationWillTerminate(_ aNotification: Notification) {
         removeMouseMoveMonitor()
         let fileManager = FileManager.default
