@@ -52,7 +52,7 @@ class OverlayView: NSView {
         let cursorX = mouseLocation.x - screenFrame.origin.x
         let cursorY = mouseLocation.y - screenFrame.origin.y
         let cursorCenter = CGPoint(x: cursorX, y: cursorY)
-
+        
         let circleRect = CGRect(
             x: cursorCenter.x - cursorRadius,
             y: cursorCenter.y - cursorRadius,
@@ -63,7 +63,7 @@ class OverlayView: NSView {
         context.setBlendMode(.clear)
         context.addEllipse(in: circleRect)
         context.fillPath()
-
+        
         context.setBlendMode(.normal)
         context.setStrokeColor(NSColor.white.cgColor)
         context.setLineWidth(2.0)
@@ -74,6 +74,7 @@ class OverlayView: NSView {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: OverlayWindow!
     var mouseMoveMonitor: Any?
+    var keyDownMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let args = CommandLine.arguments
@@ -121,20 +122,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameOrigin(frame.origin)
         window.makeKeyAndOrderFront(nil)
         self.window = window
-
-        startMouseMoveMonitor()
+        
+        startMonitors()
     }
-
-    func startMouseMoveMonitor() {
+    
+    func startMonitors() {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
             self?.window.contentView?.needsDisplay = true
         }
+        
+        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // 53 is the key code for the Esc key
+            if event.keyCode == 53 {
+                self?.cleanupAndTerminate()
+            }
+        }
     }
 
-    func removeMouseMoveMonitor() {
+    func removeMonitors() {
         if let monitor = mouseMoveMonitor {
             NSEvent.removeMonitor(monitor)
             mouseMoveMonitor = nil
+        }
+        if let monitor = keyDownMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyDownMonitor = nil
         }
     }
 
@@ -169,7 +181,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func terminateRunningInstance() {
-        removeMouseMoveMonitor()
+        removeMonitors()
         do {
             let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
             if let pid = Int32(pidString.trimmingCharacters(in: .whitespacesAndNewlines)) {
@@ -182,17 +194,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func cleanupAndTerminate() {
-        removeMouseMoveMonitor()
-        do {
-            try FileManager.default.removeItem(atPath: pidFilePath)
-        } catch {
-            print("Failed to remove PID file on exit: \(error)")
+        removeMonitors()
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: pidFilePath) {
+            do {
+                // To be safe, only remove the PID file if it belongs to this process.
+                let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
+                if pidString.trimmingCharacters(in: .whitespacesAndNewlines) == String(getpid()) {
+                    try fileManager.removeItem(atPath: pidFilePath)
+                }
+            } catch {
+                // Ignore errors here, as the app is terminating anyway.
+            }
         }
         NSApp.terminate(nil)
     }
-
+    
     func applicationWillTerminate(_ aNotification: Notification) {
-        removeMouseMoveMonitor()
+        removeMonitors()
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: pidFilePath) {
             do {
