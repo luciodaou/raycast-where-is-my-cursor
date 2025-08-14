@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, environment, closeMainWindow, PopToRootType, showHUD } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  environment,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { join } from "path";
 import * as fs from "fs";
@@ -20,7 +30,8 @@ export default function Command() {
       execSync(`"${helperPath}" "${supportPath}" off`);
       showHUD("Presentation Mode turned off");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to turn off Presentation Mode",
@@ -32,8 +43,8 @@ export default function Command() {
   }
 
   function handleSubmit(values: FormValues) {
-    const screenOpacity = parseInt(values.screenOpacity, 10);
-    const circleOpacity = parseInt(values.circleOpacity, 10);
+    const screenOpacity = parseInt(values.screenOpacity, 10) ?? 30;
+    const circleOpacity = parseInt(values.circleOpacity, 10) ?? 30;
     const hasBorder = values.hasBorder ? 1 : 0;
 
     if (isNaN(screenOpacity) || screenOpacity < 0 || screenOpacity > 80) {
@@ -42,7 +53,7 @@ export default function Command() {
         title: "Invalid Screen Opacity",
         message: "Please enter a number between 0 and 80.",
       });
-      const screenOpacity = 30;
+      // screenOpacity = 30;
       // return;
     }
 
@@ -52,7 +63,7 @@ export default function Command() {
         title: "Invalid Circle Opacity",
         message: "Please enter a number between 0 and 80.",
       });
-      const circleOpacity = 30;
+      // circleOpacity = 30;
       // return;
     }
 
@@ -60,7 +71,10 @@ export default function Command() {
 
     // Close the form immediately for a better user experience
     // popToRoot({ clearSearchBar: true });
-    closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    closeMainWindow({
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
 
     exec(command, (error) => {
       if (error) {
@@ -75,11 +89,14 @@ export default function Command() {
     });
   }
 
-return (
+  return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Start Presentation Mode" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Start Presentation Mode"
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >

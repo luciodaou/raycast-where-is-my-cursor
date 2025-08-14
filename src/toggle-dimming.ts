@@ -1,5 +1,12 @@
 import { exec, execSync } from "child_process";
-import { showToast, Toast, environment, closeMainWindow, PopToRootType, showHUD } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  environment,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
 import { join } from "path";
 import * as fs from "fs";
 
@@ -13,7 +20,8 @@ export default function main() {
       execSync(`"${helperPath}" off`);
       showHUD("Dimming turned off");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to turn off Dimming",
@@ -33,5 +41,8 @@ export default function main() {
       }
     });
   }
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
 }

@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, environment, closeMainWindow, PopToRootType, showHUD } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  environment,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
+} from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { join } from "path";
 import * as fs from "fs";
@@ -18,7 +28,8 @@ export default function Command() {
       execSync(`"${helperPath}" "${supportPath}" off`);
       showHUD("Dimming turned off");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to turn off Dimming",
@@ -44,7 +55,10 @@ export default function Command() {
 
     // Close the form immediately for a better user experience
     // popToRoot({ clearSearchBar: true });
-    closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+    closeMainWindow({
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
 
     exec(command, (error) => {
       if (error) {

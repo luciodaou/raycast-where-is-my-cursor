@@ -1,9 +1,15 @@
 import { exec } from "child_process";
-import { showToast, Toast, closeMainWindow, PopToRootType, environment } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  closeMainWindow,
+  PopToRootType,
+  environment,
+} from "@raycast/api";
 import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
-const supportPath = environment.supportPath;
+// const supportPath = environment.supportPath;
 
 export default function main() {
   // This command runs the helper without any arguments, which defaults to a 1-second highlight.
@@ -22,5 +28,8 @@ export default function main() {
       // showToast({ style: Toast.Style.Success, title: "Cursor located" });
     }
   });
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
 }
