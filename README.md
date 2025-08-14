@@ -1,4 +1,4 @@
-# Where is my Cursor
+# Where Is My Cursor
 
 Visual aid to find cursor, specially useful when utilizing more than 1 monitor.
 
