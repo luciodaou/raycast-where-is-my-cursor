@@ -12,3 +12,6 @@ yarn-error.log*
 # Env files
 .env
 assets/LocateCursor.swift.bak
+
+*.DS_Store
+.DS_Store
