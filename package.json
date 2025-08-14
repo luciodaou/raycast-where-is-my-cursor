@@ -25,6 +25,12 @@
       "title": "Dim Cursor for a Duration",
       "description": "Dim the cursor for a specified amount of time.",
       "mode": "view"
+    },
+    {
+      "name": "presentation-mode",
+      "title": "Presentation Mode",
+      "description": "Dim the screen with a yellow-tinted area around the cursor.",
+      "mode": "view"
     }
   ],
   

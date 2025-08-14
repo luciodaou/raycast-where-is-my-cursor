@@ -19,6 +19,8 @@ declare namespace Preferences {
   export type ToggleDimming = ExtensionPreferences & {}
   /** Preferences accessible in the `dim-with-duration` command */
   export type DimWithDuration = ExtensionPreferences & {}
+  /** Preferences accessible in the `presentation-mode` command */
+  export type PresentationMode = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -28,5 +30,7 @@ declare namespace Arguments {
   export type ToggleDimming = {}
   /** Arguments passed to the `dim-with-duration` command */
   export type DimWithDuration = {}
+  /** Arguments passed to the `presentation-mode` command */
+  export type PresentationMode = {}
 }
 

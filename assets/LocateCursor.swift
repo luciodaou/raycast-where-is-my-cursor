@@ -1,7 +1,33 @@
 import Cocoa
 import Foundation
 
-let pidFilePath = "/tmp/LocateCursor.pid"
+// --- Data Structures ---
+
+struct LockInfo: Codable {
+    let pid: Int32
+    let startTime: TimeInterval
+    let duration: TimeInterval // 0 for indefinite
+}
+
+struct PresentationModeConfig {
+    let screenOpacity: CGFloat
+    let circleOpacity: CGFloat
+    let hasBorder: Bool
+}
+
+
+
+// 1. Get the path to the executable file (it's an optional String)
+guard let executablePath = Bundle.main.executablePath else {
+    fatalError("Could not find executable path.")
+}
+let executableURL = URL(fileURLWithPath: executablePath)
+let directoryURL = executableURL.deletingLastPathComponent()
+let lockFileURL = directoryURL.appendingPathComponent("LocateCursor.lock")
+let lockFilePath = lockFileURL.path
+
+
+// --- UI Classes ---
 
 class OverlayWindow: NSWindow {
     init(frame: NSRect) {
@@ -23,209 +49,209 @@ class OverlayView: NSView {
     let cursorRadius: CGFloat
     let dimOpacity: CGFloat
     let screenFrame: NSRect
+    let presentationConfig: PresentationModeConfig?
 
-    init(frame: NSRect, cursorRadius: CGFloat, dimOpacity: CGFloat, screenFrame: NSRect) {
+    init(frame: NSRect, cursorRadius: CGFloat, dimOpacity: CGFloat, screenFrame: NSRect, presentationConfig: PresentationModeConfig? = nil) {
         self.cursorRadius = cursorRadius
         self.dimOpacity = dimOpacity
         self.screenFrame = screenFrame
+        self.presentationConfig = presentationConfig
         super.init(frame: frame)
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
-        context.setFillColor(NSColor.black.withAlphaComponent(dimOpacity).cgColor)
-        context.fill(bounds)
-
+        
         let mouseLocation = NSEvent.mouseLocation
-        var containingScreen: NSScreen? = NSScreen.screens.first
-        for screen in NSScreen.screens {
-            if screen.frame.contains(mouseLocation) {
-                containingScreen = screen
-                break
-            }
-        }
-        let screenFrame = containingScreen?.frame ?? NSScreen.main?.frame ?? .zero
-        let cursorX = mouseLocation.x - screenFrame.origin.x
-        let cursorY = mouseLocation.y - screenFrame.origin.y
-        let cursorCenter = CGPoint(x: cursorX, y: cursorY)
+        let screenContainingMouse = NSScreen.screens.first { $0.frame.contains(mouseLocation) } ?? NSScreen.main
+        let screenFrame = screenContainingMouse?.frame ?? .zero
+        
+        let cursorInWindow = CGPoint(x: mouseLocation.x - screenFrame.origin.x, y: mouseLocation.y - screenFrame.origin.y)
         
         let circleRect = CGRect(
-            x: cursorCenter.x - cursorRadius,
-            y: cursorCenter.y - cursorRadius,
+            x: cursorInWindow.x - cursorRadius,
+            y: cursorInWindow.y - cursorRadius,
             width: cursorRadius * 2,
             height: cursorRadius * 2
         )
 
-        context.setBlendMode(.clear)
-        context.addEllipse(in: circleRect)
-        context.fillPath()
-        
-        context.setBlendMode(.normal)
-        context.setStrokeColor(NSColor.white.cgColor)
-        context.setLineWidth(2.0)
-        context.strokeEllipse(in: circleRect)
+        if let config = presentationConfig {
+            context.clear(bounds)
+            let yellowWithOpacity = NSColor.yellow.withAlphaComponent(config.circleOpacity)
+            context.setFillColor(yellowWithOpacity.cgColor)
+            context.addEllipse(in: circleRect)
+            context.fillPath()
+
+            let inverseCirclePath = CGMutablePath()
+            inverseCirclePath.addRect(bounds)
+            inverseCirclePath.addEllipse(in: circleRect)
+
+            let dimColor = NSColor.black.withAlphaComponent(config.screenOpacity)
+            context.setFillColor(dimColor.cgColor)
+            context.addPath(inverseCirclePath)
+            context.fillPath(using: .evenOdd)
+
+            if config.hasBorder {
+                context.setStrokeColor(NSColor.white.cgColor)
+                context.setLineWidth(2.0)
+                context.strokeEllipse(in: circleRect)
+            }
+        } else {
+            context.setFillColor(NSColor.black.withAlphaComponent(self.dimOpacity).cgColor)
+            context.fill(bounds)
+            context.setBlendMode(.clear)
+            context.addEllipse(in: circleRect)
+            context.fillPath()
+            context.setBlendMode(.normal)
+            context.setStrokeColor(NSColor.white.cgColor)
+            context.setLineWidth(2.0)
+            context.strokeEllipse(in: circleRect)
+        }
     }
 }
+
+// --- Main Application Delegate ---
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: OverlayWindow!
     var mouseMoveMonitor: Any?
     var keyDownMonitor: Any?
+    
+    var presentationConfig: PresentationModeConfig?
+    // var lockFilePath: String!
+    // var lockFilePath: URL
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let args = CommandLine.arguments
-        if args.count > 1 {
-            switch args[1] {
-            case "off":
-                terminateRunningInstance()
-                NSApp.terminate(nil)
-                return
-            case "on":
-                setupOverlay()
-                handleOnCommand(args: args)
-            default:
-                setupOverlay()
-                handleLegacyOrDurationCommand(args: args)
-            }
-        } else {
-            // No arguments, run for 1 second
-            setupOverlay()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.cleanupAndTerminate()
-            }
-        }
-    }
-
-    func setupOverlay() {
-        let mouseLocation = NSEvent.mouseLocation
-        var containingScreen: NSScreen? = NSScreen.screens.first
-        for screen in NSScreen.screens {
-            if screen.frame.contains(mouseLocation) {
-                containingScreen = screen
-                break
-            }
-        }
-        let screenFrame = containingScreen?.frame ?? NSScreen.main?.frame ?? .zero
-        let frame = screenFrame
-        let window = OverlayWindow(frame: frame)
-        let view = OverlayView(
-            frame: NSRect(origin: .zero, size: frame.size),
-            cursorRadius: 80,
-            dimOpacity: 0.8,
-            screenFrame: frame
-        )
-        window.contentView = view
-        window.setFrameOrigin(frame.origin)
-        window.makeKeyAndOrderFront(nil)
-        self.window = window
         
-        startMonitors()
+        // self.lockFilePath = lockFilePath
+        
+        let command = args.count > 1 ? args[1] : "default"
+
+        if command == "off" {
+            terminateRunningInstance()
+            NSApp.terminate(nil)
+            return
+        }
+        
+        terminateRunningInstance()
+        
+        // --- Argument Parsing ---
+        
+        switch command {
+        case "on":
+            // Indefinite, normal dimming mode.
+            startSession(duration: 0)
+            
+        case "pon":
+            // Indefinite, presentation mode. All arguments are optional.
+            // Defaults: screen=30, circle=30, border=off
+            let screenOpacityArg = args.count > 2 ? Int(args[2]) : nil
+            let circleOpacityArg = args.count > 3 ? Int(args[3]) : nil
+            let hasBorderArg = args.count > 4 ? Int(args[4]) : nil
+
+            let screenOpacity = max(0, min(80, screenOpacityArg ?? 30))
+            let circleOpacity = max(0, min(50, circleOpacityArg ?? 30))
+            let hasBorder = (hasBorderArg ?? 0) != 0
+            
+            self.presentationConfig = PresentationModeConfig(
+                screenOpacity: CGFloat(screenOpacity) / 100.0,
+                circleOpacity: CGFloat(circleOpacity) / 100.0,
+                hasBorder: hasBorder
+            )
+            startSession(duration: 0)
+            
+        default:
+            // Timed duration mode (e.g., "10") or default 1-second flash.
+            let duration = TimeInterval(command) ?? 1.0
+            startSession(duration: duration)
+        }
     }
     
-    func startMonitors() {
-        mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
-            self?.window.contentView?.needsDisplay = true
+    func startSession(duration: TimeInterval) {
+        setupOverlay()
+        // Only write a lock file if the session is persistent.
+        if duration == 0 {
+            writeLockFile(duration: duration)
         }
         
-        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            // 53 is the key code for the Esc key
-            if event.keyCode == 53 {
-                self?.cleanupAndTerminate()
-            }
-        }
-    }
-
-    func removeMonitors() {
-        if let monitor = mouseMoveMonitor {
-            NSEvent.removeMonitor(monitor)
-            mouseMoveMonitor = nil
-        }
-        if let monitor = keyDownMonitor {
-            NSEvent.removeMonitor(monitor)
-            keyDownMonitor = nil
-        }
-    }
-
-    func handleOnCommand(args: [String]) {
-        writePidToFile()
-        if args.count > 2, let duration = Double(args[2]), duration > 0 {
+        if duration > 0 {
             DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                 self.cleanupAndTerminate()
             }
         }
     }
 
-    func handleLegacyOrDurationCommand(args: [String]) {
-        if let duration = Double(args[1]), duration > 0 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                self.cleanupAndTerminate()
-            }
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.cleanupAndTerminate()
-            }
-        }
+    func readLockFile() -> LockInfo? {
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: lockFilePath)) else { return nil }
+        return try? JSONDecoder().decode(LockInfo.self, from: data)
     }
 
-    func writePidToFile() {
-        let pid = getpid()
-        do {
-            try String(pid).write(toFile: pidFilePath, atomically: true, encoding: .utf8)
-        } catch {
-            print("Failed to write PID file: \(error)")
+    func writeLockFile(duration: TimeInterval) {
+        let info = LockInfo(pid: getpid(), startTime: Date().timeIntervalSince1970, duration: duration)
+        if let data = try? JSONEncoder().encode(info) {
+            try? data.write(to: URL(fileURLWithPath: lockFilePath))
         }
     }
 
     func terminateRunningInstance() {
-        removeMonitors()
-        do {
-            let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
-            if let pid = Int32(pidString.trimmingCharacters(in: .whitespacesAndNewlines)) {
-                kill(pid, SIGTERM)
+        guard let info = readLockFile() else { return }
+        if kill(info.pid, 0) == 0 {
+            kill(info.pid, SIGTERM)
+            for _ in 0..<10 {
+                if kill(info.pid, 0) != 0 { break }
+                usleep(50000)
             }
-            try FileManager.default.removeItem(atPath: pidFilePath)
-        } catch {
-            // PID file might not exist, which is fine.
         }
+        try? FileManager.default.removeItem(atPath: lockFilePath)
     }
 
     func cleanupAndTerminate() {
         removeMonitors()
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: pidFilePath) {
-            do {
-                // To be safe, only remove the PID file if it belongs to this process.
-                let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
-                if pidString.trimmingCharacters(in: .whitespacesAndNewlines) == String(getpid()) {
-                    try fileManager.removeItem(atPath: pidFilePath)
-                }
-            } catch {
-                // Ignore errors here, as the app is terminating anyway.
-            }
-        }
+        try? FileManager.default.removeItem(atPath: lockFilePath)
         NSApp.terminate(nil)
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
-        removeMonitors()
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: pidFilePath) {
-            do {
-                let pidString = try String(contentsOfFile: pidFilePath, encoding: .utf8)
-                let currentPid = getpid()
-                if pidString.trimmingCharacters(in: .whitespacesAndNewlines) == String(currentPid) {
-                    try fileManager.removeItem(atPath: pidFilePath)
-                }
-            } catch {
-                // Ignore
-            }
+        cleanupAndTerminate()
+    }
+
+    func setupOverlay() {
+        let mouseLocation = NSEvent.mouseLocation
+        let screenFrame = NSScreen.screens.first { $0.frame.contains(mouseLocation) }?.frame ?? NSScreen.main?.frame ?? .zero
+        let window = OverlayWindow(frame: screenFrame)
+        let view = OverlayView(
+            frame: NSRect(origin: .zero, size: screenFrame.size),
+            cursorRadius: 80,
+            dimOpacity: 0.8,
+            screenFrame: screenFrame,
+            presentationConfig: self.presentationConfig
+        )
+        window.contentView = view
+        window.setFrameOrigin(screenFrame.origin)
+        window.makeKeyAndOrderFront(nil)
+        self.window = window
+        startMonitors()
+    }
+    
+    func startMonitors() {
+        mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
+            self?.window.contentView?.needsDisplay = true
+        }
+        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 { self?.cleanupAndTerminate() }
         }
     }
+
+    func removeMonitors() {
+        if let monitor = mouseMoveMonitor { NSEvent.removeMonitor(monitor) }
+        if let monitor = keyDownMonitor { NSEvent.removeMonitor(monitor) }
+    }
 }
+
+// --- Main Execution ---
 
 let app = NSApplication.shared
 let delegate = AppDelegate()
