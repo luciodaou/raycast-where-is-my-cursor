@@ -15,4 +15,5 @@ Icon from <a href="https://www.flaticon.com/free-icons/helper" title="helper ico
 # Support
 
 Donate to support the development of this extension. Thank you!
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/luciodaou)
