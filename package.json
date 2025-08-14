@@ -13,6 +13,24 @@
       "title": "Where is my Cursor?",
       "description": "Visual aid to find cursor, specially useful when utilizing more than 1 monitor.",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-dimming",
+      "title": "Toggle Cursor Dimming",
+      "description": "Manually toggle the cursor dimming on and off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dim-with-duration",
+      "title": "Dim Cursor for a Duration",
+      "description": "Dim the cursor for a specified amount of time.",
+      "mode": "view"
+    },
+    {
+      "name": "presentation-mode",
+      "title": "Presentation Mode",
+      "description": "Dim the screen with a yellow-tinted area around the cursor.",
+      "mode": "view"
     }
   ],
   
