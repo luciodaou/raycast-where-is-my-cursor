@@ -1,4 +1,4 @@
-import { exec, execSync } from "child_process";
+import { execSync } from "child_process";
 import {
   showToast,
   Toast,
@@ -29,17 +29,8 @@ export default function main() {
       });
     }
   } else {
-    exec(`"${helperPath}" on`, (error) => {
-      if (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to turn on Dimming",
-          message: error.message,
-        });
-      } else {
-        showHUD("Dimming turned on");
-      }
-    });
+    execSync(`"${helperPath}" on`);
+    showHUD("Dimming turned on");
   }
   closeMainWindow({
     clearRootSearch: true,
