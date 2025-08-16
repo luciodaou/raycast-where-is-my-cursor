@@ -12,6 +12,13 @@ The source code for `LocateCursor` is available on the `LocateCursor.swift` file
 
 Icon from <a href="https://www.flaticon.com/free-icons/helper" title="helper icons">Helper icons created by Fathema Khanom - Flaticon</a>
 
+# Example
+
+[![where is my cursor demo]](/metadata/where-is-my-cursor.gif)
+
+
+[![where is my cursor presentation mode]](./metadata/presentation_mode.png)
+
 # Support
 
 Donate to support the development of this extension. Thank you!
