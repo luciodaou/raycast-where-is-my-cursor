@@ -14,13 +14,13 @@
   },
   "presentation": {
     "duration": 0,
-    "screenOpacity": 0.0,
+    "screenOpacity": 0.3,
     "circle": {
       "radius": 80,
-      "opacity": 0.2,
+      "opacity": 0.3,
       "color": "yellow",
       "border": {
-        "width": 0,
+        "width": 2,
         "color": "white"
       }
     }

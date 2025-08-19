@@ -19,8 +19,6 @@ declare namespace Preferences {
   export type ToggleDimming = ExtensionPreferences & {}
   /** Preferences accessible in the `presentation-mode` command */
   export type PresentationMode = ExtensionPreferences & {}
-  /** Preferences accessible in the `custom` command */
-  export type Custom = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -33,7 +31,5 @@ declare namespace Arguments {
   export type ToggleDimming = {}
   /** Arguments passed to the `presentation-mode` command */
   export type PresentationMode = {}
-  /** Arguments passed to the `custom` command */
-  export type Custom = {}
 }
 

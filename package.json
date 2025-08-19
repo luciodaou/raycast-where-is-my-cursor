@@ -33,12 +33,6 @@
       "title": "Presentation Mode",
       "description": "Dim the screen with a yellow-tinted area around the cursor.",
       "mode": "view"
-    },
-    {
-      "name": "custom",
-      "title": "Custom Mode",
-      "description": "Run with custom parameters.",
-      "mode": "view"
     }
   ],
   
