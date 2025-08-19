@@ -1,7 +1,7 @@
 {
   "default": {
     "duration": 1,
-    "screenOpacity": 1.0,
+    "screenOpacity": 0.5,
     "circle": {
       "radius": 80,
       "opacity": 0.0,

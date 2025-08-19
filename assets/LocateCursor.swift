@@ -51,6 +51,32 @@ class OverlayWindow: NSWindow {
         self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
     }
 }
+func colorFromString(_ colorString: String) -> NSColor {
+    let lowercasedColor = colorString.lowercased()
+    
+    let namedColors: [String: NSColor] = [
+        "red": .red, "green": .green, "blue": .blue, "white": .white,
+        "black": .black, "yellow": .yellow, "cyan": .cyan, "magenta": .magenta,
+        "orange": .orange, "purple": .purple, "brown": .brown, "clear": .clear
+    ]
+    
+    if let color = namedColors[lowercasedColor] {
+        return color
+    }
+    
+    if lowercasedColor.hasPrefix("#") {
+        let hexString = String(lowercasedColor.dropFirst())
+        if let hexValue = UInt32(hexString, radix: 16) {
+            let red = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
+            let green = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
+            let blue = CGFloat(hexValue & 0x0000FF) / 255.0
+            return NSColor(red: red, green: green, blue: blue, alpha: 1.0)
+        }
+    }
+    
+    return .black // Default color if string is invalid
+}
+
 class OverlayView: NSView {
     let config: PresetConfig
     init(frame: NSRect, config: PresetConfig) {
@@ -73,13 +99,23 @@ class OverlayView: NSView {
             width: config.circle.radius * 2,
             height: config.circle.radius * 2
         )
+        
         // Fill the background with the screen opacity
         context.setFillColor(NSColor.black.withAlphaComponent(config.screenOpacity).cgColor)
         context.fill(bounds)
-        let circleColor = colorFromString(config.circle.color)
-        context.setFillColor(circleColor.withAlphaComponent(config.circle.opacity).cgColor)
-        context.addEllipse(in: circleRect)
-        context.fillPath()
+        
+        if config.circle.color.lowercased() == "clear" {
+            context.saveGState()
+            context.addEllipse(in: circleRect)
+            context.clip()
+            context.clear(circleRect)
+            context.restoreGState()
+        } else {
+            let circleColor = colorFromString(config.circle.color)
+            context.setFillColor(circleColor.withAlphaComponent(config.circle.opacity).cgColor)
+            context.fillEllipse(in: circleRect)
+        }
+        
         if let border = config.circle.border {
             let borderColor = colorFromString(border.color)
             context.setStrokeColor(borderColor.cgColor)
