@@ -5,7 +5,6 @@ import {
   closeMainWindow,
   PopToRootType,
   environment,
-  getPreferenceValues,
 } from "@raycast/api";
 import { join } from "path";
 
@@ -16,13 +15,9 @@ interface Arguments {
 }
 
 export default function main(props: { arguments: Arguments }) {
-  const { duration } = props.arguments;
-  const preferences = getPreferenceValues<Preferences>();
-  const dimDuration = duration
-    ? parseFloat(duration)
-    : parseFloat(preferences.dimDuration);
+ 
 
-  const command = `"${helperPath}" ${dimDuration}`;
+  const command = `"${helperPath}"`;
 
   exec(command, (error) => {
     if (error) {

@@ -10,14 +10,18 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
-export default function main() {
-  const command = `"${helperPath}" 0`;
+interface Arguments {
+  duration?: string;
+}
+
+export default function main(props: { arguments: Arguments }) {
+  const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to toggle dimming",
+        title: "Failed to locate cursor",
         message: error.message,
       });
     }
