@@ -10,11 +10,8 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
-interface Arguments {
-  duration?: string;
-}
-
-export default function main(props: { arguments: Arguments }) {
+// Replace 'Arguments' with the correct type or 'any' if unknown
+export default function main(props: { arguments: any }) {
   const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
