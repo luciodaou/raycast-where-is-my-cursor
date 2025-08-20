@@ -17,7 +17,7 @@ interface FormValues {
 function handleSubmit(values: FormValues) {
   const presetConfig = {
     duration: parseFloat(values.duration || "10"),
-    screenOpacity: parseFloat(values.screenOpacity || "0.5"),
+    screenOpacity: parseFloat(values.screenOpacity || "0.0"),
     circle: {
       radius: parseFloat(values.circleRadius || "50"),
       opacity: parseFloat(values.circleOpacity || "0.4"),
@@ -33,9 +33,9 @@ function handleSubmit(values: FormValues) {
   };
 
   const jsonString = JSON.stringify(presetConfig);
-  // Escape single quotes in the JSON string for the shell
-  const escapedJsonString = jsonString.replace(/'/g, "'\'" );
-  const command = `"${helperPath}" -c '${escapedJsonString}'`;
+  // Escape double quotes in the JSON string for the shell
+  const escapedJsonString = jsonString.replace(/(["\\$`])/g, '\\$1');
+  const command = `"${helperPath}" -c "${escapedJsonString}"`;
 
   exec(command, (error) => {
     if (error) {
@@ -63,7 +63,7 @@ export default function Command() {
     >
       <Form.TextField id="duration" title="Duration (seconds)" defaultValue="10" />
       <Form.TextField id="screenOpacity" title="Screen Opacity (0-1)" defaultValue="0.0" />
-      <Form.TextField id="circleRadius" title="Circle Radius" defaultValue="60" />
+      <Form.TextField id="circleRadius" title="Circle Radius" defaultValue="50" />
       <Form.TextField id="circleOpacity" title="Circle Opacity (0-1)" defaultValue="0.4" />
       <Form.TextField id="circleColor" title="Circle Color" defaultValue="yellow" />
       <Form.Separator />
