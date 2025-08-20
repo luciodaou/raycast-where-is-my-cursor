@@ -1,5 +1,15 @@
 # Where's Cursor Changelog
 
+## [Version 3.0] - 2025-08-19
+
+This version introduces a major refactoring of the entire extension, providing more power and flexibility.
+
+- **Major Refactoring**: The Swift helper app has been completely rewritten. It is now driven by a `locatecursor.json` configuration file, allowing for predefined presets.
+- **New "Custom Locator" Command**: Added a new command that allows you to create a custom, temporary locator by specifying duration, colors, opacity, and more.
+- **Simplified Commands**: The existing commands have been simplified to use the new preset system.
+- **Enhanced `README.md`**: The documentation has been completely overhauled to be more comprehensive, user-friendly, and fun! 🗺️
+- **Removed Command**: The `dim-with-duration` command has been removed, as its functionality is now available through the new "Custom Locator" command.
+
 ## [Version 2.1] - 2025-08-19
 
 Refactored the extension to simplify the commands and add more flexibility.
