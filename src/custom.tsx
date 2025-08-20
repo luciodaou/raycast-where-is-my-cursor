@@ -34,7 +34,7 @@ function handleSubmit(values: FormValues) {
 
   const jsonString = JSON.stringify(presetConfig);
   // Escape double quotes in the JSON string for the shell
-  const escapedJsonString = jsonString.replace(/(["\\$`])/g, '\\$1');
+  const escapedJsonString = jsonString.replace(/(["])/g, '\\$1');
   const command = `"${helperPath}" -c "${escapedJsonString}"`;
 
   exec(command, (error) => {
