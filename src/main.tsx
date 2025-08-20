@@ -10,10 +10,6 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
-interface Arguments {
-  duration?: string;
-}
-
 export default function main() {
   const command = `"${helperPath}"`;
 
