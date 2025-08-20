@@ -10,8 +10,7 @@ import { join } from "path";
 
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
-// Replace 'Arguments' with the correct type or 'any' if unknown
-export default function main(props: { arguments: any }) {
+export default function main(props: { arguments: Arguments.ToggleDimming }) {
   const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
