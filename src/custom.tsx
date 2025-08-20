@@ -1,4 +1,13 @@
-import { Form, ActionPanel, Action, showToast, Toast, closeMainWindow, PopToRootType, environment } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  closeMainWindow,
+  PopToRootType,
+  environment,
+} from "@raycast/api";
 import { exec } from "child_process";
 import { join } from "path";
 
@@ -34,7 +43,7 @@ function handleSubmit(values: FormValues) {
 
   const jsonString = JSON.stringify(presetConfig);
   // Escape double quotes in the JSON string for the shell
-  const escapedJsonString = jsonString.replace(/(["])/g, '\\$1');
+  const escapedJsonString = jsonString.replace(/(["])/g, "\\$1");
   const command = `"${helperPath}" -c "${escapedJsonString}"`;
 
   exec(command, (error) => {
@@ -61,11 +70,31 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="duration" title="Duration (seconds)" defaultValue="10" />
-      <Form.TextField id="screenOpacity" title="Screen Opacity (0-1)" defaultValue="0.0" />
-      <Form.TextField id="circleRadius" title="Circle Radius" defaultValue="50" />
-      <Form.TextField id="circleOpacity" title="Circle Opacity (0-1)" defaultValue="0.4" />
-      <Form.TextField id="circleColor" title="Circle Color" defaultValue="yellow" />
+      <Form.TextField
+        id="duration"
+        title="Duration (seconds)"
+        defaultValue="10"
+      />
+      <Form.TextField
+        id="screenOpacity"
+        title="Screen Opacity (0-1)"
+        defaultValue="0.0"
+      />
+      <Form.TextField
+        id="circleRadius"
+        title="Circle Radius"
+        defaultValue="50"
+      />
+      <Form.TextField
+        id="circleOpacity"
+        title="Circle Opacity (0-1)"
+        defaultValue="0.4"
+      />
+      <Form.TextField
+        id="circleColor"
+        title="Circle Color"
+        defaultValue="yellow"
+      />
       <Form.Separator />
       <Form.TextField id="borderWidth" title="Border Width (Optional)" />
       <Form.TextField id="borderColor" title="Border Color (Optional)" />

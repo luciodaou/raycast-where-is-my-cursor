@@ -14,9 +14,7 @@ interface Arguments {
   duration?: string;
 }
 
-export default function main(props: { arguments: Arguments }) {
- 
-
+export default function main() {
   const command = `"${helperPath}"`;
 
   exec(command, (error) => {
