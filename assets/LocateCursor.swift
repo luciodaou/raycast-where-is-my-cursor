@@ -133,7 +133,10 @@ class OverlayView: NSView {
     
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
-        
+        context.setFillColor(NSColor.black.withAlphaComponent(dimOpacity).cgColor)
+        context.fill(bounds)
+
+        // Get mouse location in global screen coordinates
         let mouseLocation = NSEvent.mouseLocation
         guard let screenContainingMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) else { return }
         let screenFrame = screenContainingMouse.frame
@@ -304,7 +307,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         let view = OverlayView(frame: NSRect(origin: .zero, size: screenFrame.size), config: config)
 
         window.contentView = view
-        window.setFrameOrigin(screenFrame.origin)
+        window.setFrameOrigin(frame.origin)
         window.makeKeyAndOrderFront(nil)
 
         self.window = window
