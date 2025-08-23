@@ -19,30 +19,49 @@ interface FormValues {
   circleRadius: string;
   circleOpacity: string;
   circleColor: string;
+  circleColorHex: string;
   borderWidth?: string;
   borderColor?: string;
+  borderColorHex?: string;
 }
 
+const namedColors = [
+  { title: "Red", value: "red" },
+  { title: "Green", value: "green" },
+  { title: "Blue", value: "blue" },
+  { title: "White", value: "white" },
+  { title: "Black", value: "black" },
+  { title: "Yellow", value: "yellow" },
+  { title: "Cyan", value: "cyan" },
+  { title: "Magenta", value: "magenta" },
+  { title: "Orange", value: "orange" },
+  { title: "Purple", value: "purple" },
+  { title: "Brown", value: "brown" },
+  { title: "Clear", value: "clear" },
+];
+
 function handleSubmit(values: FormValues) {
+  const circleColor = values.circleColorHex || values.circleColor || "yellow";
+  const borderColor = values.borderColorHex || values.borderColor;
+
   const presetConfig = {
     duration: parseFloat(values.duration || "10"),
     screenOpacity: parseFloat(values.screenOpacity || "0.0"),
     circle: {
       radius: parseFloat(values.circleRadius || "50"),
       opacity: parseFloat(values.circleOpacity || "0.4"),
-      color: values.circleColor || "yellow",
+      color: circleColor,
       border:
-        values.borderWidth && values.borderColor
+        values.borderWidth && borderColor
           ? {
               width: parseFloat(values.borderWidth),
-              color: values.borderColor,
+              color: borderColor,
             }
           : undefined,
     },
   };
 
   const jsonString = JSON.stringify(presetConfig);
-  // Escape double quotes in the JSON string for the shell
   const escapedJsonString = jsonString.replace(/(["])/g, "\\$1");
   const command = `"${helperPath}" -c "${escapedJsonString}"`;
 
@@ -90,14 +109,41 @@ export default function Command() {
         title="Circle Opacity (0-1)"
         defaultValue="0.4"
       />
-      <Form.TextField
+      <Form.Dropdown
         id="circleColor"
         title="Circle Color"
         defaultValue="yellow"
+      >
+        {namedColors.map((color) => (
+          <Form.Dropdown.Item
+            key={color.value}
+            title={color.title}
+            value={color.value}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField
+        id="circleColorHex"
+        title="Or enter a custom hex color"
+        placeholder="#RRGGBB"
       />
       <Form.Separator />
       <Form.TextField id="borderWidth" title="Border Width (Optional)" />
-      <Form.TextField id="borderColor" title="Border Color (Optional)" />
+      <Form.Dropdown id="borderColor" title="Border Color (Optional)">
+        <Form.Dropdown.Item key="none" title="None" value="" />
+        {namedColors.map((color) => (
+          <Form.Dropdown.Item
+            key={color.value}
+            title={color.title}
+            value={color.value}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField
+        id="borderColorHex"
+        title="Or enter a custom hex color for border"
+        placeholder="#RRGGBB"
+      />
     </Form>
   );
 }

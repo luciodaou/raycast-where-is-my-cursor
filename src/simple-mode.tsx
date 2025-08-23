@@ -11,13 +11,13 @@ import { join } from "path";
 const helperPath = join(environment.assetsPath, "LocateCursor");
 
 export default function main() {
-  const command = `"${helperPath}" -p presentation`;
+  const command = `"${helperPath}" -p simple`;
 
   exec(command, (error) => {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to start presentation mode",
+        title: "Failed to start simple mode",
         message: error.message,
       });
     }

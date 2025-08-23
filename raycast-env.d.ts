@@ -15,8 +15,10 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `main` command */
   export type Main = ExtensionPreferences & {}
-  /** Preferences accessible in the `toggle-dimming` command */
-  export type ToggleDimming = ExtensionPreferences & {}
+  /** Preferences accessible in the `off` command */
+  export type Off = ExtensionPreferences & {}
+  /** Preferences accessible in the `simple-mode` command */
+  export type SimpleMode = ExtensionPreferences & {}
   /** Preferences accessible in the `presentation-mode` command */
   export type PresentationMode = ExtensionPreferences & {}
   /** Preferences accessible in the `custom` command */
@@ -25,12 +27,11 @@ declare namespace Preferences {
 
 declare namespace Arguments {
   /** Arguments passed to the `main` command */
-  export type Main = {
-  /** Duration in seconds */
-  "duration": string
-}
-  /** Arguments passed to the `toggle-dimming` command */
-  export type ToggleDimming = {}
+  export type Main = {}
+  /** Arguments passed to the `off` command */
+  export type Off = {}
+  /** Arguments passed to the `simple-mode` command */
+  export type SimpleMode = {}
   /** Arguments passed to the `presentation-mode` command */
   export type PresentationMode = {}
   /** Arguments passed to the `custom` command */
