@@ -13,8 +13,4 @@ export default function main() {
       showFailureToast(error, { title: "Failed to turn off cursor highlight" });
     }
   });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
-  });
 }

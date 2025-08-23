@@ -13,8 +13,8 @@ type ExtensionPreferences = {}
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `main` command */
-  export type Main = ExtensionPreferences & {}
+  /** Preferences accessible in the `where-is-my-cursor` command */
+  export type WhereIsMyCursor = ExtensionPreferences & {}
   /** Preferences accessible in the `off` command */
   export type Off = ExtensionPreferences & {}
   /** Preferences accessible in the `simple-mode` command */
@@ -26,8 +26,8 @@ declare namespace Preferences {
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `main` command */
-  export type Main = {}
+  /** Arguments passed to the `where-is-my-cursor` command */
+  export type WhereIsMyCursor = {}
   /** Arguments passed to the `off` command */
   export type Off = {}
   /** Arguments passed to the `simple-mode` command */

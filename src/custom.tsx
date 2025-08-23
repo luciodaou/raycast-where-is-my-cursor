@@ -69,10 +69,6 @@ function handleSubmit(values: FormValues) {
       showFailureToast(error, { title: "Failed to locate cursor" });
     }
   });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
-  });
 }
 
 export default function Command() {

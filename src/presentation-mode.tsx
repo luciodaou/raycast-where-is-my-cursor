@@ -13,8 +13,4 @@ export default function main() {
       showFailureToast(error, { title: "Failed to start presentation mode" });
     }
   });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
-  });
 }
