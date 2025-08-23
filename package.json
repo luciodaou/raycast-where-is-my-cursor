@@ -9,7 +9,7 @@
   "permissions": ["execute"],
   "commands": [
     {
-      "name": "main",
+      "name": "where-is-my-cursor",
       "title": "Where Is My Cursor?",
       "description": "Visual aid to find cursor, specially useful when utilizing more than 1 monitor.",
       "mode": "no-view"
