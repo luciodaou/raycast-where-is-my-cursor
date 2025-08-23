@@ -11,14 +11,15 @@ It calls a small Swift app that dims the screen where's the cursors at and puts 
 
 This extension comes with a few commands to help you out:
 
-- **Where Is My Cursor:** The main command. Use it to get a quick pulse of light around your cursor.
-- **Toggle Dimming:** This command toggles a persistent dimmed overlay on your screen, with a clear circle around your cursor.
-- **Toggle Presentation Mode:** Toggles a persistent yellow-tinted circle around your cursor to make it easier to follow.
-- **Custom Locator:** This command opens a form that lets you create a custom, temporary locator. You can configure things like:
-    - Duration
+- **Where Is My Cursor:** The main command. Use it to get a quick pulse of light around your cursor. This is the `default` mode.
+- **Simple Mode:** A simple visual aid to find the cursor. It shows a red circle with a yellow border around the cursor for 5 seconds.
+- **Presentation Mode:** A persistent yellow-tinted circle around your cursor to make it easier to follow during presentations.
+- **Custom Mode:** This command opens a form that lets you create a custom, temporary or persistent locator. You can configure things like:
+    - Duration (set to 0 for persistent)
     - Screen Opacity
     - Circle Radius, Opacity, and Color
     - Border Width and Color
+- **Turn Off Cursor Highlight:** This command immediately stops any running cursor highlight effect.
 
 ## 🛠️ Setup
 
@@ -28,7 +29,7 @@ The first time you run a command, macOS might ask for permission to control the 
 
 ## 🕵️ How It Works
 
-For the curious minds, this extension uses a small, pre-compiled Swift application located in the extension's assets. This app is responsible for creating the visual effects on the screen. The source code for this helper app is available in the `assets/LocateCursor.swift` file if you'd like to peek under the hood.
+For the curious minds, this extension uses a small, pre-compiled Swift application located in the extension's assets. This app is responsible for creating the visual effects on the screen. The source code for this helper app is available in the `assets/LocateCursor.swift` file if you'd like to peek under the hood. The helper app is also available as a standalone project at [github.com/luciodaou/LocateCursor](https://github.com/luciodaou/LocateCursor).
 
 ## 🔒 Privacy
 
