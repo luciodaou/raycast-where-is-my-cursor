@@ -137,6 +137,10 @@ class OverlayView: NSView {
         context.fill(bounds)
 
         // Get mouse location in global screen coordinates
+        context.setFillColor(NSColor.black.withAlphaComponent(dimOpacity).cgColor)
+        context.fill(bounds)
+
+        // Get mouse location in global screen coordinates
         let mouseLocation = NSEvent.mouseLocation
         guard let screenContainingMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) else { return }
         let screenFrame = screenContainingMouse.frame
@@ -308,27 +312,18 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
         window.contentView = view
         window.setFrameOrigin(frame.origin)
+        window.setFrameOrigin(frame.origin)
         window.makeKeyAndOrderFront(nil)
 
         self.window = window
-        startMonitors()
-    }
-    
-    private func startMonitors() {
-        mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
-            self?.window.contentView?.needsDisplay = true
-        }
-        keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 { self?.cleanupAndTerminate() }
+
+        // Remove overlay after 1 second
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            NSApp.terminate(nil)
         }
     }
-    private func removeMonitors() {
-        if let monitor = mouseMoveMonitor { NSEvent.removeMonitor(monitor) }
-        if
- let monitor = keyDownMonitor { NSEvent.removeMonitor(monitor) }
-     }
 }
-// MARK: - Main Execution
+
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate
