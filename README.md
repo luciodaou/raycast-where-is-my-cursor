@@ -1,12 +1,12 @@
-# 🗺️ Where Is My Cursor
+# Where's Cursor
 
-Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One second it's there, the next it's vanished into the digital abyss. Fear not! This Raycast extension is the trusty sidekick you need to find your elusive pointer in a flash! 🔦
+Visual aid to find cursor, specially useful when utilizing more than 1 monitor.
 
-It calls a small Swift app that dims the screen where's the cursors at and puts a spotlight on its location.
+It calls a small swift app located at `assets/LocateCursor` that dimms the screen where the cursor's at, leaving a small clear area around it.
 
-### Default mode
-![where is my cursor presentation mode](/metadata/LocateCursor_defaultmode.gif)
+The source code for `LocateCursor` is available on the `LocateCursor.swift` file.
 
+<<<<<<< HEAD
 ## ✨ Features
 
 This extension comes with a few commands to help you out:
@@ -49,3 +49,6 @@ Icon from <a href="https://www.flaticon.com/free-icons/helper" title="helper ico
 If you find this extension useful, consider donating to support its development. Thank you!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/luciodaou)
+=======
+Icon from <a href="https://www.flaticon.com/free-icons/helper" title="helper icons">Helper icons created by Fathema Khanom - Flaticon</a>
+>>>>>>> contributions/merge-1755976286305
