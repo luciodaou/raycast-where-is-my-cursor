@@ -20,10 +20,11 @@ export default function main() {
         title: "Failed to start simple mode",
         message: error.message,
       });
+    } else {
+      closeMainWindow({
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
     }
-  });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
   });
 }

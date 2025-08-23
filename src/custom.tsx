@@ -72,11 +72,12 @@ function handleSubmit(values: FormValues) {
         title: "Failed to locate cursor",
         message: error.message,
       });
+    } else {
+      closeMainWindow({
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
     }
-  });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
   });
 }
 

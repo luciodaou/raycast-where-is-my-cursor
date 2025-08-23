@@ -20,10 +20,11 @@ export default function main() {
         title: "Failed to turn off cursor highlight",
         message: error.message,
       });
+    } else {
+      closeMainWindow({
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
     }
-  });
-  closeMainWindow({
-    clearRootSearch: true,
-    popToRootType: PopToRootType.Immediate,
   });
 }
