@@ -2,8 +2,6 @@ import {
   Form,
   ActionPanel,
   Action,
-  closeMainWindow,
-  PopToRootType,
   environment,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";

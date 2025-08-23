@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { closeMainWindow, PopToRootType, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { join } from "path";
 
