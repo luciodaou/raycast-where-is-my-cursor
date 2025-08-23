@@ -311,31 +311,26 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
 
         self.window = window
-
         startMonitors()
     }
-
+    
     private func startMonitors() {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
             self?.window.contentView?.needsDisplay = true
         }
-
         keyDownMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 { // 53 is the keycode for Escape
-                self?.cleanupAndTerminate()
-            }
+            if event.keyCode == 53 { self?.cleanupAndTerminate() }
         }
     }
-
     private func removeMonitors() {
-        if let monitor = mouseMoveMonitor {
-            NSEvent.removeMonitor(monitor)
-        }
-        if let monitor = keyDownMonitor {
-            NSEvent.removeMonitor(monitor)
-        }
-    }
+        if let monitor = mouseMoveMonitor { NSEvent.removeMonitor(monitor) }
+        if
+ let monitor = keyDownMonitor { NSEvent.removeMonitor(monitor) }
+     }
 }
-
-let tool = LocateCursorTool()
-tool.run()
+// MARK: - Main Execution
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()
