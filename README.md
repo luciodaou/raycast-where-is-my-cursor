@@ -2,7 +2,7 @@
 
 Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One second it's there, the next it's vanished into the digital abyss. Fear not! This Raycast extension is the trusty sidekick you need to find your elusive pointer in a flash! 🔦
 
-It calls a small Swift app that dims the screen where's the cursors at and puts a spotlight on its location.
+It calls a small Swift app that dims the screen where the cursor is and puts a spotlight on its location.
 
 ### Default mode
 ![where is my cursor presentation mode](/metadata/LocateCursor_defaultmode.gif)
@@ -43,3 +43,9 @@ This extension works completely offline and does not collect, store, or transmit
 ---
 
 Icon from <a href="https://www.flaticon.com/free-icons/helper" title="helper icons">Helper icons created by Fathema Khanom - Flaticon</a>
+
+## ❤️ Support
+
+If you find this extension useful, consider donating to support its development. Thank you!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/luciodaou)
