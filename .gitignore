@@ -16,3 +16,12 @@ assets/LocateCursor.swift.bak
 *.DS_Store
 .DS_Store
 .DS_Store
+.gitignore
+node_modules
+# Raycast
+raycast-env.d.ts
+.build
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+.package-lock.json

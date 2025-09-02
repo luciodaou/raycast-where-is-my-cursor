@@ -38,3 +38,11 @@ declare namespace Arguments {
   export type Custom = {}
 }
 
+declare module "swift:*/locatecursor" {
+  export function locatecursor(arg1: string, arg2: string, arg3: string): Promise<void>;
+
+  export class SwiftError extends Error {
+    stderr: string;
+    stdout: string;
+  }
+}
