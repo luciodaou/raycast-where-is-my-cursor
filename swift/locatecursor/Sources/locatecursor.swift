@@ -139,6 +139,7 @@ class OverlayView: NSView {
     private let circleColor: CGColor
     private let borderColor: CGColor?
     private let borderWidth: CGFloat
+    private var lastInvalidRect: CGRect = .zero
 
     init(frame: NSRect, config: PresetConfig) {
         self.config = config
@@ -161,14 +162,46 @@ class OverlayView: NSView {
         return nil
     }
 
+    func updateCursorLocation(_ mouseLocation: NSPoint) {
+        guard let window = self.window else { return }
+
+        let screenContainingMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) ?? window.screen ?? NSScreen.main
+        let screenFrame = screenContainingMouse?.frame ?? window.frame
+
+        if window.frame != screenFrame {
+            window.setFrame(screenFrame, display: true)
+            self.frame = NSRect(origin: .zero, size: screenFrame.size)
+            self.lastInvalidRect = .zero
+            self.needsDisplay = true
+            return
+        }
+
+        let cursorInWindow = CGPoint(x: mouseLocation.x - screenFrame.origin.x, y: mouseLocation.y - screenFrame.origin.y)
+        let radius = config.circle.radius
+        let padding = borderWidth + 4
+        let circleRect = CGRect(
+            x: cursorInWindow.x - radius,
+            y: cursorInWindow.y - radius,
+            width: radius * 2,
+            height: radius * 2
+        )
+        let currentInvalidRect = circleRect.insetBy(dx: -padding, dy: -padding)
+
+        if lastInvalidRect.isEmpty {
+            setNeedsDisplay(currentInvalidRect)
+        } else {
+            setNeedsDisplay(lastInvalidRect.union(currentInvalidRect))
+        }
+
+        lastInvalidRect = currentInvalidRect
+    }
+
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
 
         let mouseLocation = NSEvent.mouseLocation
-        guard let screenContainingMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) else { return }
-        let screenFrame = screenContainingMouse.frame
-
-        let cursorInWindow = CGPoint(x: mouseLocation.x - screenFrame.origin.x, y: mouseLocation.y - screenFrame.origin.y)
+        let windowFrame = window?.frame ?? bounds
+        let cursorInWindow = CGPoint(x: mouseLocation.x - windowFrame.origin.x, y: mouseLocation.y - windowFrame.origin.y)
 
         let radius = config.circle.radius
         let circleRect = CGRect(
@@ -179,7 +212,7 @@ class OverlayView: NSView {
         )
 
         context.setFillColor(screenColor)
-        context.fill(bounds)
+        context.fill(dirtyRect)
 
         if isClearCircle {
             context.saveGState()
@@ -268,9 +301,13 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     private func terminateProcess(pid: Int32) {
         if let runningApp = NSRunningApplication(processIdentifier: pid),
            runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
-            runningApp.terminate()
-            if !runningApp.isTerminated {
-                runningApp.forceTerminate()
+            let isLocateCursorApp = runningApp.bundleIdentifier == "com.raycast.where-is-my-cursor" ||
+                                    runningApp.executableURL?.lastPathComponent == "locatecursor"
+            if isLocateCursorApp {
+                runningApp.terminate()
+                if !runningApp.isTerminated {
+                    runningApp.forceTerminate()
+                }
             }
         }
     }
@@ -316,7 +353,8 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
     private func startMonitors() {
         mouseMoveMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
-            self?.window?.contentView?.needsDisplay = true
+            guard let self = self, let overlayView = self.window?.contentView as? OverlayView else { return }
+            overlayView.updateCursorLocation(NSEvent.mouseLocation)
         }
 
         let escapeKeyCode: UInt16 = 53
