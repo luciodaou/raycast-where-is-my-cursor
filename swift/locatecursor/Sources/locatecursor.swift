@@ -110,28 +110,22 @@ func colorFromString(_ colorString: String) -> NSColor {
     if lowercased.hasPrefix("#") {
         let hexString = String(lowercased.dropFirst())
         let len = hexString.count
-        if len == 3 {
-            if let hexValue = UInt32(hexString, radix: 16) {
-                let r = CGFloat((hexValue & 0xF00) >> 8) / 15.0
-                let g = CGFloat((hexValue & 0x0F0) >> 4) / 15.0
-                let b = CGFloat(hexValue & 0x00F) / 15.0
-                return NSColor(red: r, green: g, blue: b, alpha: 1.0)
-            }
-        } else if len == 6 {
-            if let hexValue = UInt32(hexString, radix: 16) {
-                let r = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
-                let g = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
-                let b = CGFloat(hexValue & 0x0000FF) / 255.0
-                return NSColor(red: r, green: g, blue: b, alpha: 1.0)
-            }
-        } else if len == 8 {
-            if let hexValue = UInt32(hexString, radix: 16) {
-                let r = CGFloat((hexValue & 0xFF000000) >> 24) / 255.0
-                let g = CGFloat((hexValue & 0x00FF0000) >> 16) / 255.0
-                let b = CGFloat((hexValue & 0x0000FF00) >> 8) / 255.0
-                let a = CGFloat(hexValue & 0x000000FF) / 255.0
-                return NSColor(red: r, green: g, blue: b, alpha: a)
-            }
+        if len == 3, let hexValue = UInt32(hexString, radix: 16) {
+            let r = CGFloat((hexValue & 0xF00) >> 8) / 15.0
+            let g = CGFloat((hexValue & 0x0F0) >> 4) / 15.0
+            let b = CGFloat(hexValue & 0x00F) / 15.0
+            return NSColor(red: r, green: g, blue: b, alpha: 1.0)
+        } else if len == 6, let hexValue = UInt32(hexString, radix: 16) {
+            let r = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
+            let g = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
+            let b = CGFloat(hexValue & 0x0000FF) / 255.0
+            return NSColor(red: r, green: g, blue: b, alpha: 1.0)
+        } else if len == 8, let hexValue = UInt32(hexString, radix: 16) {
+            let r = CGFloat((hexValue & 0xFF000000) >> 24) / 255.0
+            let g = CGFloat((hexValue & 0x00FF0000) >> 16) / 255.0
+            let b = CGFloat((hexValue & 0x0000FF00) >> 8) / 255.0
+            let a = CGFloat(hexValue & 0x000000FF) / 255.0
+            return NSColor(red: r, green: g, blue: b, alpha: a)
         }
     }
     
@@ -282,12 +276,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }
 
     private func terminateRunningInstance() {
-        if let pid = readLockFile() {
-            terminateProcess(pid: pid)
-        }
-        if let lockURL = lockFileURL {
-            try? FileManager.default.removeItem(at: lockURL)
-        }
+        stop()
     }
 
     private func cleanupAndTerminate() {
