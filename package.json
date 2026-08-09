@@ -67,6 +67,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "postinstall": "node -e \"const fs=require('fs'); const p='node_modules/@raycast/api/dist/utils/publish/copy-dir.js'; if(fs.existsSync(p)){ fs.writeFileSync(p, fs.readFileSync(p,'utf8').replace('\\\"compiled_raycast_swift\\\",','')); }\"",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
