@@ -5,7 +5,7 @@ Ever lost your cursor in the vast expanse of your multi-monitor setup? 😥 One 
 It calls a small Swift app that dims the screen where the cursor is and puts a spotlight on its location.
 
 ### Default mode
-![where is my cursor presentation mode](/metadata/LocateCursor_defaultmode.gif)
+![where is my cursor default mode](metadata/default_mode.gif)
 
 ## ✨ Features
 
@@ -38,7 +38,7 @@ This extension works completely offline and does not collect, store, or transmit
 ## 🖼️ Examples
 
 ### Presentation mode
-![where is my cursor presentation mode](/metadata/LocateCursor_presentationmode.gif)
+![where is my cursor presentation mode](metadata/presentation_mode.gif)
 
 ---
 
