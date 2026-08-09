@@ -1,3 +1,4 @@
+.gitignore
 # Dependencies
 /node_modules
 
@@ -25,3 +26,6 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 .package-lock.json
+.agents
+
+.gitignore
