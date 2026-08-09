@@ -140,6 +140,7 @@ class OverlayView: NSView {
     private let borderColor: CGColor?
     private let borderWidth: CGFloat
     private var lastInvalidRect: CGRect = .zero
+    private var currentCircleRect: CGRect = .zero
 
     init(frame: NSRect, config: PresetConfig) {
         self.config = config
@@ -172,6 +173,7 @@ class OverlayView: NSView {
             window.setFrame(screenFrame, display: true)
             self.frame = NSRect(origin: .zero, size: screenFrame.size)
             self.lastInvalidRect = .zero
+            self.currentCircleRect = .zero
             self.needsDisplay = true
             return
         }
@@ -185,6 +187,7 @@ class OverlayView: NSView {
             width: radius * 2,
             height: radius * 2
         )
+        self.currentCircleRect = circleRect
         let currentInvalidRect = circleRect.insetBy(dx: -padding, dy: -padding)
 
         if lastInvalidRect.isEmpty {
@@ -199,17 +202,21 @@ class OverlayView: NSView {
     override func draw(_ dirtyRect: NSRect) {
         guard let context = NSGraphicsContext.current?.cgContext else { return }
 
-        let mouseLocation = NSEvent.mouseLocation
-        let windowFrame = window?.frame ?? bounds
-        let cursorInWindow = CGPoint(x: mouseLocation.x - windowFrame.origin.x, y: mouseLocation.y - windowFrame.origin.y)
-
-        let radius = config.circle.radius
-        let circleRect = CGRect(
-            x: cursorInWindow.x - radius,
-            y: cursorInWindow.y - radius,
-            width: radius * 2,
-            height: radius * 2
-        )
+        let circleRect: CGRect
+        if !currentCircleRect.isEmpty {
+            circleRect = currentCircleRect
+        } else {
+            let mouseLocation = NSEvent.mouseLocation
+            let windowFrame = window?.frame ?? bounds
+            let cursorInWindow = CGPoint(x: mouseLocation.x - windowFrame.origin.x, y: mouseLocation.y - windowFrame.origin.y)
+            let radius = config.circle.radius
+            circleRect = CGRect(
+                x: cursorInWindow.x - radius,
+                y: cursorInWindow.y - radius,
+                width: radius * 2,
+                height: radius * 2
+            )
+        }
 
         context.setFillColor(screenColor)
         context.fill(dirtyRect)
