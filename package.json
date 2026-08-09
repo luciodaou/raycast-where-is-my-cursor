@@ -10,8 +10,8 @@
     "Productivity"
   ],
   "license": "MIT",
-  "permissions": [
-    "execute"
+  "platforms": [
+    "macOS"
   ],
   "commands": [
     {
