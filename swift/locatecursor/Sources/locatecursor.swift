@@ -36,11 +36,11 @@ class ConfigLoader {
                 let decoder = JSONDecoder()
                 return try decoder.decode(Config.self, from: data)
             } catch {
-                print("Error loading or decoding config: \(error)")
+                NSLog("Error loading or decoding config: \(error)")
                 return nil
             }
         } else {
-            print("Warning: locatecursor.json not found. Using default configuration.")
+            NSLog("Warning: locatecursor.json not found. Using default configuration.")
             return Config(
                 default: PresetConfig(
                     duration: 2,
@@ -94,42 +94,76 @@ class OverlayWindow: NSWindow {
     }
 }
 
+private let namedColors: [String: NSColor] = [
+    "red": .red, "green": .green, "blue": .blue, "white": .white,
+    "black": .black, "yellow": .yellow, "cyan": .cyan, "magenta": .magenta,
+    "orange": .orange, "purple": .purple, "brown": .brown, "clear": .clear
+]
+
 func colorFromString(_ colorString: String) -> NSColor {
-    let lowercasedColor = colorString.lowercased()
+    let lowercased = colorString.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     
-    let namedColors: [String: NSColor] = [
-        "red": .red, "green": .green, "blue": .blue, "white": .white,
-        "black": .black, "yellow": .yellow, "cyan": .cyan, "magenta": .magenta,
-        "orange": .orange, "purple": .purple, "brown": .brown, "clear": .clear
-    ]
-    
-    if let color = namedColors[lowercasedColor] {
+    if let color = namedColors[lowercased] {
         return color
     }
     
-    if lowercasedColor.hasPrefix("#") {
-        let hexString = String(lowercasedColor.dropFirst())
-        if let hexValue = UInt32(hexString, radix: 16) {
-            let red = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
-            let green = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
-            let blue = CGFloat(hexValue & 0x0000FF) / 255.0
-            return NSColor(red: red, green: green, blue: blue, alpha: 1.0)
+    if lowercased.hasPrefix("#") {
+        let hexString = String(lowercased.dropFirst())
+        let len = hexString.count
+        if len == 3 {
+            if let hexValue = UInt32(hexString, radix: 16) {
+                let r = CGFloat((hexValue & 0xF00) >> 8) / 15.0
+                let g = CGFloat((hexValue & 0x0F0) >> 4) / 15.0
+                let b = CGFloat(hexValue & 0x00F) / 15.0
+                return NSColor(red: r, green: g, blue: b, alpha: 1.0)
+            }
+        } else if len == 6 {
+            if let hexValue = UInt32(hexString, radix: 16) {
+                let r = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
+                let g = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
+                let b = CGFloat(hexValue & 0x0000FF) / 255.0
+                return NSColor(red: r, green: g, blue: b, alpha: 1.0)
+            }
+        } else if len == 8 {
+            if let hexValue = UInt32(hexString, radix: 16) {
+                let r = CGFloat((hexValue & 0xFF000000) >> 24) / 255.0
+                let g = CGFloat((hexValue & 0x00FF0000) >> 16) / 255.0
+                let b = CGFloat((hexValue & 0x0000FF00) >> 8) / 255.0
+                let a = CGFloat(hexValue & 0x000000FF) / 255.0
+                return NSColor(red: r, green: g, blue: b, alpha: a)
+            }
         }
     }
     
-    return .black // Default color if string is invalid
+    return .black
 }
 
 class OverlayView: NSView {
     let config: PresetConfig
+    private let isClearCircle: Bool
+    private let screenColor: CGColor
+    private let circleColor: CGColor
+    private let borderColor: CGColor?
+    private let borderWidth: CGFloat
 
     init(frame: NSRect, config: PresetConfig) {
         self.config = config
+        self.isClearCircle = (config.circle.color.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "clear")
+        self.screenColor = NSColor.black.withAlphaComponent(config.screenOpacity).cgColor
+        let rawCircleColor = colorFromString(config.circle.color)
+        self.circleColor = rawCircleColor.withAlphaComponent(config.circle.opacity).cgColor
+        if let border = config.circle.border {
+            self.borderColor = colorFromString(border.color).cgColor
+            self.borderWidth = border.width
+        } else {
+            self.borderColor = nil
+            self.borderWidth = 0
+        }
         super.init(frame: frame)
     }
 
     required init?(coder: NSCoder) {
-        print("Error: init(coder:) is not implemented.")
+        NSLog("Error: init(coder:) is not implemented.")
         return nil
     }
 
@@ -142,33 +176,31 @@ class OverlayView: NSView {
 
         let cursorInWindow = CGPoint(x: mouseLocation.x - screenFrame.origin.x, y: mouseLocation.y - screenFrame.origin.y)
 
+        let radius = config.circle.radius
         let circleRect = CGRect(
-            x: cursorInWindow.x - config.circle.radius,
-            y: cursorInWindow.y - config.circle.radius,
-            width: config.circle.radius * 2,
-            height: config.circle.radius * 2
+            x: cursorInWindow.x - radius,
+            y: cursorInWindow.y - radius,
+            width: radius * 2,
+            height: radius * 2
         )
 
-        // Fill the background with the screen opacity
-        context.setFillColor(NSColor.black.withAlphaComponent(config.screenOpacity).cgColor)
+        context.setFillColor(screenColor)
         context.fill(bounds)
 
-        if config.circle.color.lowercased() == "clear" {
+        if isClearCircle {
             context.saveGState()
             context.addEllipse(in: circleRect)
             context.clip()
             context.clear(circleRect)
             context.restoreGState()
         } else {
-            let circleColor = colorFromString(config.circle.color)
-            context.setFillColor(circleColor.withAlphaComponent(config.circle.opacity).cgColor)
+            context.setFillColor(circleColor)
             context.fillEllipse(in: circleRect)
         }
 
-        if let border = config.circle.border {
-            let borderColor = colorFromString(border.color)
-            context.setStrokeColor(borderColor.cgColor)
-            context.setLineWidth(border.width)
+        if let borderColor = borderColor, borderWidth > 0 {
+            context.setStrokeColor(borderColor)
+            context.setLineWidth(borderWidth)
             context.strokeEllipse(in: circleRect)
         }
     }
@@ -197,18 +229,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
 
     func start(with config: PresetConfig, duration: TimeInterval) {
         if let pid = readLockFile() {
-            if let runningApp = NSRunningApplication(processIdentifier: pid) {
-                if runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
-                    runningApp.terminate()
-                    let start = Date()
-                    while !runningApp.isTerminated && Date().timeIntervalSince(start) < 0.1 {
-                        Thread.sleep(forTimeInterval: 0.05)
-                    }
-                    if !runningApp.isTerminated {
-                        runningApp.forceTerminate()
-                    }
-                }
-            }
+            terminateProcess(pid: pid)
         }
 
         writeLockFile()
@@ -226,8 +247,11 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }
 
     func stop() {
-        if isAnotherInstanceRunning() {
-            terminateRunningInstance()
+        if let pid = readLockFile() {
+            terminateProcess(pid: pid)
+        }
+        if let lockURL = lockFileURL {
+            try? FileManager.default.removeItem(at: lockURL)
         }
     }
 
@@ -247,19 +271,19 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         return NSRunningApplication(processIdentifier: pid) != nil
     }
 
-    private func terminateRunningInstance() {
-        guard let pid = readLockFile() else { return }
-        if let runningApp = NSRunningApplication(processIdentifier: pid) {
-            if runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
-                runningApp.terminate()
-                let start = Date()
-                while !runningApp.isTerminated && Date().timeIntervalSince(start) < 0.1 {
-                    Thread.sleep(forTimeInterval: 0.05)
-                }
-                if !runningApp.isTerminated {
-                    runningApp.forceTerminate()
-                }
+    private func terminateProcess(pid: Int32) {
+        if let runningApp = NSRunningApplication(processIdentifier: pid),
+           runningApp.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+            runningApp.terminate()
+            if !runningApp.isTerminated {
+                runningApp.forceTerminate()
             }
+        }
+    }
+
+    private func terminateRunningInstance() {
+        if let pid = readLockFile() {
+            terminateProcess(pid: pid)
         }
         if let lockURL = lockFileURL {
             try? FileManager.default.removeItem(at: lockURL)
@@ -298,6 +322,7 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
         self.window = window
 
         startMonitors()
+        emitRaycastSuccess()
     }
 
     private func startMonitors() {
@@ -324,17 +349,24 @@ class LocateCursorTool: NSObject, NSApplicationDelegate {
     }
 }
 
+private func emitRaycastSuccess() {
+    fputs("{}\n", stdout)
+    fflush(stdout)
+}
+
 @raycast func locatecursor(arg1: String, arg2: String, arg3: String) {
     let tool = LocateCursorTool()
 
     if arg1 == "off" {
         tool.stop()
+        emitRaycastSuccess()
         return
     }
     
     let configLoader = ConfigLoader()
     guard let config = configLoader.loadConfig() else {
-        print("Failed to load config.")
+        NSLog("Failed to load config.")
+        emitRaycastSuccess()
         return
     }
 
